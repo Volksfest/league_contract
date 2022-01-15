@@ -17,6 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: build --all --target wasm32-unknown-unknown --release
+      run: cargo build --all --target wasm32-unknown-unknown --release
     - name: Run tests
-      run: test --package league-contract -- --nocapture
+      run: cargo test --package league-contract -- --nocapture
