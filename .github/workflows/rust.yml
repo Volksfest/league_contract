@@ -16,10 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: jetli/wasm-pack-action@v0.3.0
-      with:
-      # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
-        version: 'latest'
+    - name: Prepare
+      run: rustup target add wasm32-unknown-unknown
     - name: Build
       run: cargo build --all --target wasm32-unknown-unknown --release
     - name: Run tests
