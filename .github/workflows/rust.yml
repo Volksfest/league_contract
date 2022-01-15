@@ -20,5 +20,9 @@ jobs:
       run: rustup target add wasm32-unknown-unknown
     - name: Build
       run: cargo build --all --target wasm32-unknown-unknown --release
+    - name: Check Format
+      run: cargo fmt -- --check
+    - name: Clippy
+      run: cargo clippy --all-features -- -D warnings
     - name: Run tests
       run: cargo test --package league-contract -- --nocapture
