@@ -51,7 +51,7 @@ impl LeagueContract {
         league_name: &str,
         players: &[String],
         accounts: &[AccountId],
-        best_of: usize,
+        best_of: u8,
         game_type: GameType,
     ) {
         require!(best_of % 2 == 1, "best_of number should be odd");

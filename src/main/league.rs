@@ -25,12 +25,12 @@ use crate::main::keys::CollectionKeyTuple;
 /// The contestants of a `GameMatch`.
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct PlayerPair {
-    first: usize,
-    second: usize,
+    first: u8,
+    second: u8,
 }
 
 impl PlayerPair {
-    pub fn new(first: usize, second: usize) -> Self {
+    pub fn new(first: u8, second: u8) -> Self {
         if first <= second {
             PlayerPair { first, second }
         } else {
@@ -93,7 +93,7 @@ pub enum UpgradeableLeagueProperties {
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct LeagueProperties {
     /// The maximum amount of games each `GameMatch` may have
-    pub best_of: usize,
+    pub best_of: u8,
     /// The actual type of the game which is played.
     pub game_type: GameType,
 }
