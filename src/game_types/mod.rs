@@ -11,11 +11,12 @@ pub mod standard;
 
 use crate::game_types::standard::StandardGame;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use serde::Serialize;
 
 /// An enum without an additional value.
 ///
 /// It is used to decide which game type shall be generated
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize)]
 pub enum GameType {
     StandardGameType,
 }
