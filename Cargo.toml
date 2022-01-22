@@ -2,13 +2,13 @@
 name = "league-contract"
 version = "0.1.0"
 authors = ["Volksfest <s.barut@tu-bs.de>"]
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-near-sdk = "3.1.0"
+near-sdk = "4.0.0-pre.6"
 #near-sdk-sim = "3.2.0"
 
 [profile.release]
