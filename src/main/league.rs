@@ -53,6 +53,8 @@ pub struct League {
     game_matches: UnorderedMap<PlayerPair, GameMatch>,
     /// The set of accounts being allowed to manipulate the league. Can be seen as moderators.
     trusted_account_ids: LookupSet<AccountId>,
+    /// The owner of the league (in this context the same as the creator)
+    owner: AccountId,
 }
 
 impl League {
@@ -67,12 +69,18 @@ impl League {
             players,
             trusted_account_ids,
             game_matches: UnorderedMap::new(keys.get_matches_key()),
+            owner: env::predecessor_account_id(),
         }
     }
 
-    pub fn is_allowed(&self) -> bool {
+    pub fn caller_is_allowed(&self) -> bool {
         self.trusted_account_ids
             .contains(&env::predecessor_account_id())
+            || self.caller_is_owner()
+    }
+
+    pub fn caller_is_owner(&self) -> bool {
+        env::predecessor_account_id() == self.owner
     }
 
     pub fn is_finished(&self) -> bool {

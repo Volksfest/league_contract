@@ -55,7 +55,6 @@ impl LeagueContract {
         game_type: GameType,
     ) {
         require!(best_of % 2 == 1, "best_of number should be odd");
-        require!(!accounts.is_empty(), "Need at least one trusted account");
         require!(players.len() > 2, "League needs at least 3 participant");
         require!(
             league_name.len() > 2,
@@ -75,11 +74,26 @@ impl LeagueContract {
             p.push(player);
         }
         let mut a = LookupSet::new(keys.get_trusted_key());
+        let caller = &env::predecessor_account_id();
         for account in accounts {
-            a.insert(account);
+            if account != caller {
+                a.insert(account);
+            }
         }
         let l = League::new(keys, prop, p, a);
         self.leagues.insert(&league_name.to_string(), &l);
+    }
+
+    pub fn delete_league(&mut self, league_name: &str, force: bool) {
+        // Cannot remove yet
+        let key = &league_name.to_string();
+        let league = self.leagues.get(key);
+        require!(league.is_some(), "League to delete not found");
+        // safe to use unwrap now. Could be done in match pattern but I like this more for require!
+        let league = league.unwrap();
+        require!(league.caller_is_owner(), "You may not delete the league");
+        require!(league.is_finished() || force, "League is not finished yet");
+        self.leagues.remove(key);
     }
 }
 
