@@ -1,14 +1,31 @@
-/// The `Game` trait for the contract to be independent of actual game types.
-pub trait Game {
-    /// Check who won in the game.
-    ///
-    /// The concrete winner is given by the `GameMatch`.
-    /// Here only the winner of the two contestants is needed which is given as the returned bool.
-    fn is_first_player_winner(&self) -> bool;
+use crate::game_types::standard::StandardGameData;
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use serde::{Serialize, Deserialize};
 
-    /// Return the json containing all meta data.
-    ///
-    /// As the contract shall be independent of the game type it cannot be able to parse the game.
-    /// The type shall create its interpretation itself and return it in this method.
-    fn get_description_json(&self) -> String;
+/// An enum without an additional value.
+///
+/// It is used to decide which game type shall be generated
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+pub enum GameType {
+    StandardGameType,
+}
+
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct Game {
+    first_player_is_winner : bool,
+    game_data : Vec<u8>,
+}
+
+impl Game {
+    pub fn new_with_data(first_player_is_winner: bool, game_type: GameType, data: &String) -> Option<Self> {
+        let game_data =
+        match game_type {
+            GameType::StandardGameType => StandardGameData::convert(data),
+        }?;
+        Some(Game{first_player_is_winner, game_data})
+    }
+
+    pub fn first_player_won(&self) -> bool {
+        self.first_player_is_winner
+    }
 }

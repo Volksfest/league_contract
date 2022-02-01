@@ -22,7 +22,7 @@ use near_sdk::collections::Vector;
 use near_sdk::collections::{LookupMap, LookupSet};
 use near_sdk::{env, near_bindgen, require, AccountId, PanicOnDefault};
 
-use game_types::GameType;
+use game_types::game::GameType;
 use main::keys::CollectionKeyTuple;
 use main::league::{League, LeagueProperties, UpgradeableLeagueProperties};
 

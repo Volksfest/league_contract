@@ -1,8 +1,21 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use serde::{Serialize, Deserialize};
+use serde_json;
 
-/// Bare minimum type for the `Game` trait
-#[derive(BorshDeserialize, BorshSerialize)]
-pub struct StandardGame {
-    /// The only given information is the winner
-    is_first_player_winner: bool,
+/// s
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+pub struct StandardGameData {
+
+}
+
+impl StandardGameData {
+    pub fn convert(data: &String) -> Option<Vec<u8>> {
+        match serde_json::from_str::<StandardGameData>(data) {
+            Ok(obj) => match borsh::to_vec(&obj) {
+                Ok(serialization) => Some(serialization),
+                Err(_) => None,
+            },
+            Err(_) => None,
+        }
+    }
 }

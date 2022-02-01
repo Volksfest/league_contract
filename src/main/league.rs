@@ -11,7 +11,7 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 
 use super::game_match::GameMatch;
-use crate::game_types::GameType;
+use crate::game_types::game::GameType;
 
 use near_sdk::collections::LookupSet;
 use near_sdk::collections::UnorderedMap;
