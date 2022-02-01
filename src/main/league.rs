@@ -17,10 +17,12 @@ use near_sdk::collections::LookupSet;
 use near_sdk::collections::UnorderedMap;
 use near_sdk::collections::Vector;
 use near_sdk::AccountId;
+use near_sdk::require;
 
 use near_sdk::env;
 
 use crate::main::keys::CollectionKeyTuple;
+use crate::game_types::game::Game;
 
 /// The contestants of a `GameMatch`.
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -38,6 +40,22 @@ impl PlayerPair {
                 first: second,
                 second: first,
             }
+        }
+    }
+
+    pub fn first(&self) -> u8 {
+        self.first
+    }
+
+    pub fn second(&self) -> u8 {
+        self.second
+    }
+
+    pub fn is_swapped(&self, should_be_first : u8) -> bool {
+        if self.first == should_be_first {
+            false
+        } else {
+            true
         }
     }
 }
@@ -87,7 +105,46 @@ impl League {
         let p = self.players.len();
         // Gaussian sum formula.
         // It yields to the number of matches where each player played with everybody.
-        self.game_matches.len() == p * (p - 1) / 2
+        // Or at least started...
+        if self.game_matches.len() != p * (p - 1) / 2 {
+            return false;
+        } else {
+            // So in case everyone started to play against each other
+            // it still needs to be confirmed that they also finished
+            for (_pair, game_match) in self.game_matches.iter() {
+                if !game_match.winner(self.properties.get_best_of()).exist() {
+                    return false;
+                }
+            }
+        }
+        true
+    }
+
+    pub fn add_game(&mut self, player_names: &(String, String), first_in_tuple_won: bool, game_data: &String) {
+        let mut first : Option<u8> = None;
+        let mut second : Option<u8> = None;
+        for (idx,i) in self.players.iter().enumerate() {
+            if i == player_names.0 {
+                first = Some(idx as u8);
+            } else if i == player_names.1 {
+                second = Some(idx as u8);
+            }
+        }
+        require!(first.is_some() && second.is_some(), "At least one player not found in the league");
+        let pair = PlayerPair::new(first.unwrap(), second.unwrap());
+        let game_match = self.game_matches.get(&pair);
+
+        let mut game_match = match game_match {
+            None => GameMatch::new(),
+            Some(m) => m,
+        };
+        require!(!game_match.winner(self.properties.get_best_of()).exist(), "Match is already finished");
+        // Swaps the win flag if the names were swapped in the first place
+        let first_has_won = pair.is_swapped(first.unwrap()) ^ first_in_tuple_won;
+        let game = Game::new_with_data(first_has_won, self.properties.get_game_type(), game_data);
+        require!(game.is_some(), "Game data cannot be parsed in the game type");
+        game_match.add_game(game.unwrap());
+        self.game_matches.insert(&pair, &game_match);
     }
 }
 
@@ -104,4 +161,19 @@ pub struct LeagueProperties {
     pub best_of: u8,
     /// The actual type of the game which is played.
     pub game_type: GameType,
+}
+
+/// Convenient implementation
+impl UpgradeableLeagueProperties {
+    pub fn get_best_of(&self) -> u8 {
+        match self {
+            UpgradeableLeagueProperties::V1(prop) => prop.best_of
+        }
+    }
+
+    pub fn get_game_type(&self) -> GameType {
+        match self {
+            UpgradeableLeagueProperties::V1(prop) => prop.game_type.clone()
+        }
+    }
 }

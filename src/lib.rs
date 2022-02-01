@@ -94,6 +94,20 @@ impl LeagueContract {
         require!(league.is_finished() || force, "League is not finished yet");
         self.leagues.remove(&league_name);
     }
+
+    pub fn add_game(
+        &mut self,
+        league_name: String,
+        player_names: (String, String),
+        first_in_tuple_won: bool,
+        game_data: String,
+    ) {
+        let league = self.leagues.get(&league_name.to_string());
+        require!(league.is_some(), "League does not exist");
+        let mut league = league.unwrap();
+        league.add_game(&player_names, first_in_tuple_won, &game_data);
+        self.leagues.insert(&league_name.to_string(), &league);
+    }
 }
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
