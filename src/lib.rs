@@ -48,9 +48,9 @@ impl LeagueContract {
 
     pub fn create_league(
         &mut self,
-        league_name: &str,
-        players: &[String],
-        accounts: &[AccountId],
+        league_name: String,
+        players: Vec<String>,
+        accounts: Vec<AccountId>,
         best_of: u8,
         game_type: GameType,
     ) {
@@ -65,35 +65,34 @@ impl LeagueContract {
             "League with that name already exists"
         );
 
-        let keys = CollectionKeyTuple::new(league_name);
+        let keys = CollectionKeyTuple::new(&league_name);
 
         let prop = UpgradeableLeagueProperties::V1(LeagueProperties { best_of, game_type });
 
         let mut p = Vector::new(keys.get_players_key());
         for player in players {
-            p.push(player);
+            p.push(&player);
         }
         let mut a = LookupSet::new(keys.get_trusted_key());
         let caller = &env::predecessor_account_id();
         for account in accounts {
-            if account != caller {
-                a.insert(account);
+            if account != *caller {
+                a.insert(&account);
             }
         }
         let l = League::new(keys, prop, p, a);
-        self.leagues.insert(&league_name.to_string(), &l);
+        self.leagues.insert(&league_name, &l);
     }
 
-    pub fn delete_league(&mut self, league_name: &str, force: bool) {
+    pub fn delete_league(&mut self, league_name: String, force: bool) {
         // Cannot remove yet
-        let key = &league_name.to_string();
-        let league = self.leagues.get(key);
+        let league = self.leagues.get(&league_name);
         require!(league.is_some(), "League to delete not found");
         // safe to use unwrap now. Could be done in match pattern but I like this more for require!
         let league = league.unwrap();
         require!(league.caller_is_owner(), "You may not delete the league");
         require!(league.is_finished() || force, "League is not finished yet");
-        self.leagues.remove(key);
+        self.leagues.remove(&league_name);
     }
 }
 

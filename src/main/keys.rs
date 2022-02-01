@@ -31,7 +31,7 @@ impl CollectionKeyTuple {
     }
 
     /// Create a new key collection tuple from a _unique_ string
-    pub fn new(seed: &str) -> Self {
+    pub fn new(seed: &String) -> Self {
         let mut r = env::sha256(seed.as_bytes());
 
         // Simply add another byte to the usual sha256 to make three unique but similar keys
