@@ -16,13 +16,13 @@ use crate::game_types::game::GameType;
 use near_sdk::collections::LookupSet;
 use near_sdk::collections::UnorderedMap;
 use near_sdk::collections::Vector;
-use near_sdk::AccountId;
 use near_sdk::require;
+use near_sdk::AccountId;
 
 use near_sdk::env;
 
-use crate::main::keys::CollectionKeyTuple;
 use crate::game_types::game::Game;
+use crate::main::keys::CollectionKeyTuple;
 
 /// The contestants of a `GameMatch`.
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -51,12 +51,8 @@ impl PlayerPair {
         self.second
     }
 
-    pub fn is_swapped(&self, should_be_first : u8) -> bool {
-        if self.first == should_be_first {
-            false
-        } else {
-            true
-        }
+    pub fn is_swapped(&self, should_be_first: u8) -> bool {
+        self.first != should_be_first
     }
 }
 
@@ -120,17 +116,25 @@ impl League {
         true
     }
 
-    pub fn add_game(&mut self, player_names: &(String, String), first_in_tuple_won: bool, game_data: &String) {
-        let mut first : Option<u8> = None;
-        let mut second : Option<u8> = None;
-        for (idx,i) in self.players.iter().enumerate() {
+    pub fn add_game(
+        &mut self,
+        player_names: &(String, String),
+        first_in_tuple_won: bool,
+        game_data: &String,
+    ) {
+        let mut first: Option<u8> = None;
+        let mut second: Option<u8> = None;
+        for (idx, i) in self.players.iter().enumerate() {
             if i == player_names.0 {
                 first = Some(idx as u8);
             } else if i == player_names.1 {
                 second = Some(idx as u8);
             }
         }
-        require!(first.is_some() && second.is_some(), "At least one player not found in the league");
+        require!(
+            first.is_some() && second.is_some(),
+            "At least one player not found in the league"
+        );
         let pair = PlayerPair::new(first.unwrap(), second.unwrap());
         let game_match = self.game_matches.get(&pair);
 
@@ -138,11 +142,17 @@ impl League {
             None => GameMatch::new(),
             Some(m) => m,
         };
-        require!(!game_match.winner(self.properties.get_best_of()).exist(), "Match is already finished");
+        require!(
+            !game_match.winner(self.properties.get_best_of()).exist(),
+            "Match is already finished"
+        );
         // Swaps the win flag if the names were swapped in the first place
         let first_has_won = pair.is_swapped(first.unwrap()) ^ first_in_tuple_won;
         let game = Game::new_with_data(first_has_won, self.properties.get_game_type(), game_data);
-        require!(game.is_some(), "Game data cannot be parsed in the game type");
+        require!(
+            game.is_some(),
+            "Game data cannot be parsed in the game type"
+        );
         game_match.add_game(game.unwrap());
         self.game_matches.insert(&pair, &game_match);
     }
@@ -167,13 +177,13 @@ pub struct LeagueProperties {
 impl UpgradeableLeagueProperties {
     pub fn get_best_of(&self) -> u8 {
         match self {
-            UpgradeableLeagueProperties::V1(prop) => prop.best_of
+            UpgradeableLeagueProperties::V1(prop) => prop.best_of,
         }
     }
 
     pub fn get_game_type(&self) -> GameType {
         match self {
-            UpgradeableLeagueProperties::V1(prop) => prop.game_type.clone()
+            UpgradeableLeagueProperties::V1(prop) => prop.game_type.clone(),
         }
     }
 }

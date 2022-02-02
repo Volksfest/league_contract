@@ -6,5 +6,5 @@
 //!
 //! As proof of concept a game type for Starcraft is planned.
 
-pub mod standard;
 pub mod game;
+pub mod standard;

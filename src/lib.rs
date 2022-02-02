@@ -102,17 +102,17 @@ impl LeagueContract {
         first_in_tuple_won: bool,
         game_data: String,
     ) {
-        let league = self.leagues.get(&league_name.to_string());
+        let league = self.leagues.get(&league_name);
         require!(league.is_some(), "League does not exist");
         let mut league = league.unwrap();
         league.add_game(&player_names, first_in_tuple_won, &game_data);
-        self.leagues.insert(&league_name.to_string(), &league);
+        self.leagues.insert(&league_name, &league);
     }
 }
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
-    use crate::game_types::GameType::StandardGameType;
+    use crate::game_types::game::GameType::StandardGameType;
     use crate::LeagueContract;
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::testing_env;
@@ -154,13 +154,7 @@ mod tests {
         let mut contract = LeagueContract::new();
         let players = vec!["Alice".to_string(), "Bob".to_string(), "Charly".to_string()];
         let accs = vec![accounts(0), accounts(1)];
-        contract.create_league(
-            &"SomeLeague".to_string(),
-            &players,
-            &accs,
-            3,
-            StandardGameType,
-        );
+        contract.create_league("SomeLeague".to_string(), players, accs, 3, StandardGameType);
     }
 
     #[test]
@@ -177,18 +171,12 @@ mod tests {
         let players = vec!["Alice".to_string(), "Bob".to_string(), "Charly".to_string()];
         let accs = vec![accounts(0), accounts(1)];
         contract.create_league(
-            &"SomeLeague".to_string(),
-            &players,
-            &accs,
+            "SomeLeague".to_string(),
+            players.clone(),
+            accs.clone(),
             3,
             StandardGameType,
         );
-        contract.create_league(
-            &"SomeLeague".to_string(),
-            &players,
-            &accs,
-            3,
-            StandardGameType,
-        );
+        contract.create_league("SomeLeague".to_string(), players, accs, 3, StandardGameType);
     }
 }

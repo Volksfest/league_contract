@@ -1,37 +1,32 @@
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::Vector;
 use crate::game_types::game::Game;
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 
 /// The match between two contestants.
 ///
 /// This contains all games where the max is given by the league properties (`best_of`).
 /// The GameVariants type must be the same as in the league properties (`game_type`)
 /// The pair of the contestants is given by the `PlayerPair` typed key.
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize, Default)]
 pub struct GameMatch {
     /// The vector containing the games
     games: Vec<Game>,
 }
 
-
 pub enum Winner {
     FirstPlayer,
     SecondPlayer,
-    None
+    None,
 }
 
 impl Winner {
     pub fn exist(&self) -> bool {
-        match self {
-            Winner::None => false,
-            _ => true
-        }
+        matches!(self, Winner::None)
     }
 }
 
 impl GameMatch {
     pub fn new() -> Self {
-        GameMatch{games: Vec::new()}
+        GameMatch { games: Vec::new() }
     }
 
     pub fn winner(&self, best_of: u8) -> Winner {
@@ -42,8 +37,8 @@ impl GameMatch {
                 None => break,
                 Some(s) => match s.first_player_won() {
                     true => a += 1,
-                    false => b += 1
-                }
+                    false => b += 1,
+                },
             }
         }
 

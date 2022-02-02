@@ -1,12 +1,9 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json;
 
-/// s
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-pub struct StandardGameData {
-
-}
+pub struct StandardGameData {}
 
 impl StandardGameData {
     pub fn convert(data: &String) -> Option<Vec<u8>> {
