@@ -59,7 +59,7 @@ To be implemented
 
 - [x] Write a README.md (maybe a bit earlier the next time)
 - [ ] Add more tests
-- [ ] Add more documentation
+- [x] Add more documentation
 
 ## Further ideas
 

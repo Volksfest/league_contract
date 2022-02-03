@@ -1,13 +1,14 @@
-//! Creating unique keys for the collections inside a league
+//! Helper module with utility structs
 //!
-//! This assumes a unique string as the seed for the keys.
-//! As a league name is unique it will be used to generate its keys.
-//! The keys are necessary for the serialized collections.
 //!
 
 use near_sdk::env;
 
-/// The three collection keys needed inside a league
+/// Creating unique keys for the collections inside a league
+///
+/// This assumes a unique string as the seed for the keys.
+/// As a league name is unique it will be used to generate its keys.
+/// The keys are necessary for the serialized collections.
 pub struct CollectionKeyTuple {
     players_key: Vec<u8>,
     trusted_key: Vec<u8>,

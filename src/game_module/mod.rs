@@ -1,15 +1,26 @@
-use crate::game_types::standard::StandardGameData;
+//! This modules contains all different game types with their data
+//!
+//! The `Game` struct contains one of the structs inside `game_types` depending on the
+//! league properties `GameType`.
+
+pub mod game_types;
+
+use crate::game_module::game_types::StandardGameData;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use serde::{Deserialize, Serialize};
 
-/// An enum without an additional value.
+/// An enum to describe the game type
 ///
-/// It is used to decide which game type shall be generated
+/// It is used to decide to which game the data shall be deserialized
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
 pub enum GameType {
     StandardGameType,
 }
 
+/// The game type
+///
+/// The contestants are given by the containing `GameMatch`
+/// Here only the winner of the single game is given and the additional serialized data
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Game {
     first_player_is_winner: bool,
@@ -17,6 +28,10 @@ pub struct Game {
 }
 
 impl Game {
+    /// Create a new game
+    ///
+    /// `first_player_is_winner` does exactly what its name is.
+    /// The 'game_type' is the type to decide in which the JSON `data` shall be deserialized
     pub fn new_with_data(
         first_player_is_winner: bool,
         game_type: GameType,
@@ -31,6 +46,7 @@ impl Game {
         })
     }
 
+    /// Retrieve if the first player is the winner
     pub fn first_player_won(&self) -> bool {
         self.first_player_is_winner
     }

@@ -2,19 +2,18 @@
 //!
 //! The smart contract handles multiple named leagues.
 //! Each league can have a specific game type with additional meta information of each game.
-//! Game types can still be added.
-//! They also can be quite generic as long there is a 1v1 type, e.g. soccer.
-//! A scoreboard and evaluation of the game meta types is not part of the contract.
+//! Game types can still be added in `game_module::game_types`.
+//! They also can be quite generic as long as it is a 1v1 type, e.g. soccer.
+//! A scoreboard and evaluation of the game meta types is not part of the contract
+//!   mostly because it can be done outside, too. (and I postpone it..)
 //!
 //! Per league there are trusted accounts
-//! which can manipulate the league and the actual game scores.
-//! The creation of a league will have a fee for the compensation of the memory usage
-//! and will need the list of the trusted accounts.
-//! Maybe the money shall be refunded?
+//! which can manipulate the league and the actual game matches.
+//! The owner (=creator) of the league may also delete the league.
 
 extern crate near_sdk;
 
-pub mod game_types;
+pub mod game_module;
 pub mod main;
 
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
@@ -22,11 +21,13 @@ use near_sdk::collections::Vector;
 use near_sdk::collections::{LookupMap, LookupSet};
 use near_sdk::{env, near_bindgen, require, AccountId, PanicOnDefault};
 
-use game_types::game::GameType;
-use main::keys::CollectionKeyTuple;
-use main::league::{League, LeagueProperties, UpgradeableLeagueProperties};
+use game_module::GameType;
+use main::helper::CollectionKeyTuple;
+use main::{League, LeagueProperties, UpgradeableLeagueProperties};
 
 /// The smart contract
+///
+/// The actual smart contract struct
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct LeagueContract {
@@ -37,6 +38,8 @@ pub struct LeagueContract {
 #[near_bindgen]
 impl LeagueContract {
     /// Initialize the contract
+    ///
+    /// The initialization is quite straight forward without any additional information needed.
     #[init]
     pub fn new() -> Self {
         require!(!env::state_exists(), "Already initialized");
@@ -46,6 +49,12 @@ impl LeagueContract {
         }
     }
 
+    /// The create a league call
+    ///
+    /// The caller is the owner of the league.
+    /// He has to give a `league_name` and a list of trusted `accounts` who may also create call to this league.
+    /// With `best_of` and `game_type` all necessary league properties were given.
+    /// Finally the a list of `players` in the league were also needed.
     pub fn create_league(
         &mut self,
         league_name: String,
@@ -65,14 +74,18 @@ impl LeagueContract {
             "League with that name already exists"
         );
 
+        // Create unique keys for the collections inside the league
         let keys = CollectionKeyTuple::new(&league_name);
 
         let prop = UpgradeableLeagueProperties::V1(LeagueProperties { best_of, game_type });
 
+        // Convert the player standard vec to a NEAR collection for the blockchain
         let mut p = Vector::new(keys.get_players_key());
         for player in players {
             p.push(&player);
         }
+        // Do the same with the account ids. Also check if the caller does not mention himself.
+        // The caller is assumed to be trusted and has as owner even more rights.
         let mut a = LookupSet::new(keys.get_trusted_key());
         let caller = &env::predecessor_account_id();
         for account in accounts {
@@ -84,6 +97,11 @@ impl LeagueContract {
         self.leagues.insert(&league_name, &l);
     }
 
+    /// The delete a league call
+    ///
+    /// The caller has to be the owner of the league by the name `league_name`.
+    /// The league won't be deleted if it is not finished except it is explicitely wished by setting
+    /// `force` to true!
     pub fn delete_league(&mut self, league_name: String, force: bool) {
         // Cannot remove yet
         let league = self.leagues.get(&league_name);
@@ -95,6 +113,12 @@ impl LeagueContract {
         self.leagues.remove(&league_name);
     }
 
+    /// The add a game to a league call
+    ///
+    /// The caller has to be a trusted account of the league by the name `league_name`.
+    /// The game with the given `game_data` and the players given by `player_names` will be added.
+    /// The `game_data` has to be deserializable to the type given by the league's `GameType`.
+    /// Also the winner has to be given by explicitely saying if the `first_in_tuple_won` or not...
     pub fn add_game(
         &mut self,
         league_name: String,
@@ -112,7 +136,7 @@ impl LeagueContract {
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
-    use crate::game_types::game::GameType::StandardGameType;
+    use crate::game_module::GameType::StandardGameType;
     use crate::LeagueContract;
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::testing_env;
