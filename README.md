@@ -58,7 +58,7 @@ To be implemented
 ## Important
 
 - [x] Write a README.md (maybe a bit earlier the next time)
-- [ ] Add more tests
+- [x] Add more tests
 - [x] Add more documentation
 
 ## Further ideas

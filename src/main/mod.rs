@@ -146,6 +146,8 @@ impl League {
     /// As such add a game with additional `game_data` for the players given by name.
     /// The indices of these players are searched and then checked if the game can be added to a match.
     /// The game itself needs to be created by additional conversion of the `game_data` json.
+    ///
+    /// Beware! This method can panic too!
     pub fn add_game(
         &mut self,
         player_names: &(String, String),
@@ -235,7 +237,7 @@ impl Winner {
     ///
     /// If not it means that the game match is still ongoing.
     pub fn exist(&self) -> bool {
-        matches!(self, Winner::None)
+        !matches!(self, Winner::None)
     }
 }
 
