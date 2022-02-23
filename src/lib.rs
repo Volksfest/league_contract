@@ -140,13 +140,24 @@ impl LeagueContract {
     /// Now the frontend (or other user) can check which types can be used to create a league
     /// This could be actually static but does a static function make sense for a contract?!?
     pub fn get_game_types(&self) -> Vec<&'static str> {
-        //vec!("StandardGameType")
         GameType::VARIANTS.to_vec()
+    }
+
+    /// VIEW: Retrieve the structure of a game type
+    ///
+    /// The frontend can build a form to add games to a league.
+    /// A JSON of the structure will be returned
+    /// TODO just a stub right now. The StandardGameType is the only type and contains nothing
+    pub fn get_game_structure(&self, game_type: GameType) -> String {
+        match game_type {
+            GameType::StandardGameType => "".to_string(),
+        }
     }
 }
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
+    use crate::game_module::GameType;
     use crate::game_module::GameType::StandardGameType;
     use crate::LeagueContract;
     use near_sdk::test_utils::{accounts, VMContextBuilder};
@@ -597,15 +608,25 @@ mod tests {
         );
     }
 
-    /// TODO Potentially a bad test which should be removed in longer runs!
-    ///
     /// The idea of the macro is to to it only once and not add the game types everywhere
     /// but for the beginning it is nice to test whether the view works
+    /// Or well maybe nice to check here if every game is inside
     #[test]
     fn test_list_game_types() {
         let _context = create_context();
 
         let contract = LeagueContract::new();
         assert_eq!(vec!("StandardGameType"), contract.get_game_types());
+    }
+
+    #[test]
+    fn test_standard_game_structure() {
+        let _context = create_context();
+
+        let contract = LeagueContract::new();
+        assert_eq!(
+            "".to_string(),
+            contract.get_game_structure(GameType::StandardGameType)
+        );
     }
 }
