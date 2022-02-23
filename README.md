@@ -63,7 +63,7 @@ To be implemented
 
 ## Further ideas
 
-- [ ] Implement Views
+- [x] Implement Views
 - [ ] Add Starcraft as an additional game type
 - [ ] Add Views for Starcraft
 - [ ] Add a pledge

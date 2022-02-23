@@ -21,6 +21,8 @@ use near_sdk::AccountId;
 use crate::game_module::Game;
 use crate::game_module::GameType;
 
+use serde::Serialize;
+
 /// The contestants of a `GameMatch`.
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct PlayerPair {
@@ -192,6 +194,52 @@ impl League {
         game_match.add_game(game.unwrap());
         self.game_matches.insert(&pair, &game_match);
     }
+
+    /// Summarize the league as a json string
+    ///
+    /// Well, maybe I should just call it serialize?
+    /// But this gets also annoying as every ser/de lib calls some generated functions like that
+    pub fn summarize_league(&self) -> String {
+        let best_of = self.properties.get_best_of();
+        let matches = self
+            .game_matches
+            .iter()
+            .map(|(pair, game_match)| HelperMatch {
+                first_player: self.players.get(pair.first as u64).unwrap(),
+                second_player: self.players.get(pair.second as u64).unwrap(),
+                winner: game_match.winner(best_of),
+                games: game_match.summarize_match(self.properties.get_game_type()),
+            })
+            .collect::<Vec<HelperMatch>>();
+        //shouldn't be able to fail
+        serde_json::to_string(&HelperLeague { best_of, matches }).unwrap()
+    }
+}
+
+/// Helper struct for serialization
+#[derive(Serialize)]
+struct HelperLeague {
+    pub best_of: u8,
+    pub matches: Vec<HelperMatch>,
+}
+
+/// Helper struct for serialization
+#[derive(Serialize)]
+struct HelperMatch {
+    pub first_player: String,
+    pub second_player: String,
+    pub winner: Winner,
+    pub games: Vec<HelperGame>,
+}
+
+/// Helper struct for serialization
+///
+/// unfortunately the data is also as a string although it is a nested json
+/// TODO solve the nested JSON better
+#[derive(Serialize)]
+struct HelperGame {
+    pub first_player_is_winner: bool,
+    pub data: String,
 }
 
 /// The upgradeable enum for the properties to be able to easily upgrade the league
@@ -226,6 +274,7 @@ impl UpgradeableLeagueProperties {
 }
 
 /// Description who the winner is if he exists
+#[derive(Serialize)]
 pub enum Winner {
     FirstPlayer,
     SecondPlayer,
@@ -291,5 +340,16 @@ impl GameMatch {
     /// Actually insert would be maybe a better terminology
     pub fn add_game(&mut self, game: Game) {
         self.games.push(game);
+    }
+
+    /// Put the games in the match together as HelperGames for serialization
+    fn summarize_match(&self, game_type: GameType) -> Vec<HelperGame> {
+        self.games
+            .iter()
+            .map(|x| HelperGame {
+                first_player_is_winner: x.first_player_won(),
+                data: x.game_content(&game_type),
+            })
+            .collect::<Vec<HelperGame>>()
     }
 }

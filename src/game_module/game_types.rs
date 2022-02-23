@@ -24,4 +24,11 @@ impl StandardGameData {
             Err(_) => None,
         }
     }
+
+    /// Converts the borsh binaries into json again
+    ///
+    /// Same TODO as above
+    pub fn convert_back(data: &Vec<u8>) -> String {
+        serde_json::to_string(&StandardGameData::try_from_slice(data.as_slice()).unwrap()).unwrap()
+    }
 }

@@ -51,4 +51,13 @@ impl Game {
     pub fn first_player_won(&self) -> bool {
         self.first_player_is_winner
     }
+
+    /// Retrieve the game content as JSON
+    ///
+    /// TODO this will be nested into another json. this looks ugly as string
+    pub fn game_content(&self, game_type: &GameType) -> String {
+        match game_type {
+            GameType::StandardGameType => StandardGameData::convert_back(&self.game_data),
+        }
+    }
 }

@@ -153,6 +153,15 @@ impl LeagueContract {
             GameType::StandardGameType => "".to_string(),
         }
     }
+
+    /// VIEW: Get the current league progress
+    ///
+    /// Retrieve the leagues progress as a JSON
+    pub fn get_league(&self, league_name: String) -> String {
+        let league = self.leagues.get(&league_name);
+        require!(league.is_some(), "League does not exist");
+        league.unwrap().summarize_league()
+    }
 }
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
@@ -549,8 +558,6 @@ mod tests {
             true,
             "{}".to_string(),
         );
-
-        // TODO add a view later to verify finished game
     }
 
     #[test]
@@ -628,5 +635,33 @@ mod tests {
             "".to_string(),
             contract.get_game_structure(GameType::StandardGameType)
         );
+    }
+
+    /// Kept it simple as the json gets quite annoying
+    #[test]
+    fn test_league_output() {
+        let _context = create_context();
+
+        let mut contract = LeagueContract::new();
+        let name = "SomeLeague".to_string();
+        let players = vec!["Alice".to_string(), "Bob".to_string(), "Charly".to_string()];
+        contract.create_league(
+            name.clone(),
+            players.clone(),
+            Vec::new(),
+            5,
+            StandardGameType,
+        );
+
+        contract.add_game(
+            name,
+            (players[0].clone(), players[1].clone()),
+            true,
+            "{}".to_string(),
+        );
+
+        let summary = contract.get_league("SomeLeague".to_string());
+        assert_eq!("{\"best_of\":5,\"matches\":[{\"first_player\":\"Alice\",\"second_player\":\"Bob\",\"winner\":\"None\",\"games\":[{\"first_player_is_winner\":true,\"data\":\"{}\"}]}]}".to_string(), summary);
+        println!("{}", summary);
     }
 }
