@@ -49,7 +49,7 @@ impl LeagueContract {
         }
     }
 
-    /// The create a league call
+    /// CALL: Create a league
     ///
     /// The caller is the owner of the league.
     /// He has to give a `league_name` and a list of trusted `accounts` who may also create call to this league.
@@ -97,7 +97,7 @@ impl LeagueContract {
         self.leagues.insert(&league_name, &l);
     }
 
-    /// The delete a league call
+    /// CALL: Delete a league
     ///
     /// The caller has to be the owner of the league by the name `league_name`.
     /// The league won't be deleted if it is not finished except it is explicitely wished by setting
@@ -113,7 +113,7 @@ impl LeagueContract {
         self.leagues.remove(&league_name);
     }
 
-    /// The add a game to a league call
+    /// CALL: Add a game to a league
     ///
     /// The caller has to be a trusted account of the league by the name `league_name`.
     /// The game with the given `game_data` and the players given by `player_names` will be added.
