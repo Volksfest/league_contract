@@ -24,6 +24,7 @@ use near_sdk::{env, near_bindgen, require, AccountId, PanicOnDefault};
 use game_module::GameType;
 use main::helper::CollectionKeyTuple;
 use main::{League, LeagueProperties, UpgradeableLeagueProperties};
+use strum::VariantNames;
 
 /// The smart contract
 ///
@@ -132,6 +133,15 @@ impl LeagueContract {
         let mut league = league.unwrap();
         league.add_game(&player_names, first_in_tuple_won, &game_data);
         self.leagues.insert(&league_name, &league);
+    }
+
+    /// VIEW: Retrieve a list of all implemented game types
+    ///
+    /// Now the frontend (or other user) can check which types can be used to create a league
+    /// This could be actually static but does a static function make sense for a contract?!?
+    pub fn get_game_types(&self) -> Vec<&'static str> {
+        //vec!("StandardGameType")
+        GameType::VARIANTS.to_vec()
     }
 }
 
@@ -585,5 +595,17 @@ mod tests {
             false,
             "{}".to_string(),
         );
+    }
+
+    /// TODO Potentially a bad test which should be removed in longer runs!
+    ///
+    /// The idea of the macro is to to it only once and not add the game types everywhere
+    /// but for the beginning it is nice to test whether the view works
+    #[test]
+    fn test_list_game_types() {
+        let _context = create_context();
+
+        let contract = LeagueContract::new();
+        assert_eq!(vec!("StandardGameType"), contract.get_game_types());
     }
 }

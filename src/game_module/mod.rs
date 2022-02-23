@@ -8,11 +8,12 @@ pub mod game_types;
 use crate::game_module::game_types::StandardGameData;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumVariantNames;
 
 /// An enum to describe the game type
 ///
 /// It is used to decide to which game the data shall be deserialized
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone, EnumVariantNames)]
 pub enum GameType {
     StandardGameType,
 }
