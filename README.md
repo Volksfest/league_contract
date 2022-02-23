@@ -47,11 +47,17 @@ Additionally, of course, all calls need the league's name.
 
 The idea behind the deleting is mostly to get back resources.
 As a todo the creation of a league should be payable 
-  which gets refunded when deleted (as a pledge).
+  which gets refunded when deleted (as a pledge to prevent flooding).
 
 ### Views
 
-To be implemented
+- Retrieve a list of implemented game types with ``LeagueContract::get_game_types``
+  - right now only ``StandardGameType``
+- Retrieve structure of a game type with ``LeaugeContract::get_game_structure``
+  - Needs one of the game types retrieved from the previous view
+  - again, right now only ``StandardGameType`` and this one has nothing
+- Get the current state of a league with ``LeagueContract::get_league``
+  - Needs the name of the league
 
 # Todos
 
